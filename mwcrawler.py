@@ -92,7 +92,7 @@ def decisor(url):
                 return
 
     else:
-        dest = '/opt/malware/unsorted/'+filetype
+        dest = dumpdir+'/unsorted/'+filetype
         fpath = dest+'/'+str(md5)
 
         if not os.path.exists(dest):
@@ -190,6 +190,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-t", "--thug", help="Enable thug analysis", action="store_true")
     parser.add_argument("-p", "--proxy", help="Define HTTP proxy as address:port")
+    parser.add_argument("-d", "--dumpdir", help="Define dump directory for retrieved files")
     args = parser.parse_args()
 
     try:
@@ -207,6 +208,17 @@ if __name__ == "__main__":
         my_ip = urllib2.urlopen('http://whatthehellismyip.com/?ipraw').read()
         print '- External sites see',my_ip
 
+    # dump directory
+    if args.dumpdir:
+        dumpdir = args.dumpdir
+        try:
+            os.mkdir(dumpdir+'/.tmp')
+            os.rmdir(dumpdir+'/.tmp')
+        except:
+            print '- Could not open',dumpdir,'for reading, using default'
+            dumpdir = '/opt/malware/unsorted'
+    else:
+        dumpdir = '/opt/malware/unsorted'
 
     #source list
     minotaur(parse('http://minotauranalysis.com/malwarelist-urls.aspx'))
