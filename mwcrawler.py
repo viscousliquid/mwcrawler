@@ -188,7 +188,7 @@ if __name__ == "__main__":
     print "Malware Parser v0.4"
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("-t", "--thug", help="Enable thug analysis")
+    parser.add_argument("-t", "--thug", help="Enable thug analysis", action="store_true")
     args = parser.parse_args()
 
     try:
