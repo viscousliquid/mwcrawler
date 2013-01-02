@@ -189,6 +189,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-t", "--thug", help="Enable thug analysis", action="store_true")
+    parser.add_argument("-p", "--proxy", help="Define HTTP proxy as address:port")
     args = parser.parse_args()
 
     try:
@@ -196,6 +197,16 @@ if __name__ == "__main__":
             loadthug()
     except:
         print "- Thug analysis not enabled (use -t to enable thug)"
+
+    # proxy support
+    if args.proxy:
+        proxy = urllib2.ProxyHandler({'http': args.proxy})
+        opener = urllib2.build_opener(proxy)
+        urllib2.install_opener(opener)
+        print '- Using proxy', args.proxy
+        my_ip = urllib2.urlopen('http://whatthehellismyip.com/?ipraw').read()
+        print '- External sites see',my_ip
+
 
     #source list
     minotaur(parse('http://minotauranalysis.com/malwarelist-urls.aspx'))
