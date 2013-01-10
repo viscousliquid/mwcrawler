@@ -29,6 +29,7 @@ import os
 import socket
 import datetime
 import argparse
+import logging
 
 # By default thug analyis is disabled
 isthug    = False
@@ -47,9 +48,9 @@ def loadthug():
         sys.path.append('/opt/thug/src')
         import thug
         isthug = True
-        print "- Thug module loaded for html analysis"
+        logging.info("Thug module loaded for html analysis")
     except ImportError:
-        print "- No Thug module found, html code inspection won't be available"
+        logging.warning("No Thug module found, html code inspection won't be available")
 
 # determine file type for correct archival
 def gettype(file):
@@ -64,7 +65,7 @@ def parse(url):
     try:
         http = bs(urllib2.urlopen(request))
     except:
-        print "- Error parsing %s" % (url)
+        logging.error('Error parsing %s',url)
         return
     return http
 
@@ -83,12 +84,12 @@ def decisor(url):
 
     if (filetype == 'HTML'):
         if isthug:
-            print "-- Thug candidate: HTML code in %s" % url
+            logging.info('Thug candidate: HTML code in %s', url)
 
             try:
                 thug.Thug([url])()
             except Exception, e:
-                print "- Thug error: %s" % e
+                logging.error('Thug error: %s', e)
                 return
 
     else:
@@ -102,10 +103,10 @@ def decisor(url):
             file = open(fpath, 'wb')
             file.write(url_dl)
             file.close
-            print "-- Saved file type %s with md5: %s" % (filetype,md5)
+            logging.info("Saved file type %s with md5: %s", filetype, md5)
 
 def malwaredl(soup):
-    print "- Fetching from Malware Domain List"
+    logging.info("Fetching from Malware Domain List")
     mdl=[]
     for row in soup('description'):
         mdl.append(row)
@@ -117,23 +118,23 @@ def malwaredl(soup):
             mdl_sites.append(re.sub('&amp;','&',str(row).split()[4]).replace(',',''))
         else:
             mdl_sites.append(site)
-    print "-- Found %s urls" % len(mdl)
+    logging.info('Found %s urls', len(mdl))
     for row in mdl_sites:
         decisor(row)
 
 def vxvault(soup):
-    print "- Fetching from VXVault"
+    logging.info("Fetching from VXVault")
     vxv=[]
     for row in soup('pre'):
         vxv = row.string.split('\r\n')
     del vxv[:4]
     del vxv[-1]
-    print "-- Found %s urls" % len(vxv)
+    logging.info('Found %s urls', len(vxv))
     for row in vxv:
         decisor(row)
 
 def malc0de(soup):
-    print "- Fetching from Malc0de"
+    logging.info("Fetching from Malc0de")
     mlc=[]
     for row in soup('description'):
         mlc.append(row)
@@ -142,46 +143,46 @@ def malc0de(soup):
     for row in mlc:
         site = re.sub('&amp;','&',str(row).split()[1]).replace(',','')
         mlc_sites.append(site)
-    print "-- Found %s urls" % len(mlc_sites)
+    logging.info('Found %s urls', len(mlc_sites))
     for row in mlc_sites:
         decisor(row)
 
 def malwarebl(soup):
-    print "- Fetching from Malware Black List"
+    logging.info("Fetching from Malware Black List")
     mbl=[]
     for row in soup('description'):
         site = str(row).split()[1].replace(',','')
         mbl.append(site)
-    print "-- Found %s urls" % len(mbl)
+    logging.info('Found %s urls', len(mbl))
     for row in mbl:
         decisor(row)
 
 def minotaur(soup):
-    print "- Fetching from NovCon Minotaur"
-    min=[]
+    logging.info("Fetching from NovCon Minotaur")
+    minsites=[]
     for row in soup('td'):
         try:
             if re.match('http',row.string):
-                min.append(row.string)
+                minsites.append(row.string)
         except:
             pass
-    print "-- Found %s urls" % len(min)
-    for row in min: 
+    logging.info('Found %s urls', len(minsites))
+    for row in minsites: 
         decisor(row)
 
 def sacour(soup):
-    print "- Fetching from Sacour.cn"
+    logging.info("Fetching from Sacour.cn")
     for url in soup('a'):
-        min=[]
+        sacsites=[]
         if re.match('list/',url['href']):
             suburl = parse('http://www.sacour.cn/'+url['href'])
             for text in suburl('body'):
                 for urls in text.contents:
                     if re.match('http://',str(urls)):
-                        min.append(str(urls))
-        if len(min) > 0:
-            print "-- Found %s urls in %s" % (len(min),url['href'])
-            for row in min:
+                        sacsites.append(str(urls))
+        if len(sacsites) > 0:
+            logging.info('Found %s urls in %s', len(sacsites),url['href'])
+            for row in sacsites:
                 decisor(row)
 
 if __name__ == "__main__":
@@ -191,22 +192,23 @@ if __name__ == "__main__":
     parser.add_argument("-t", "--thug", help="Enable thug analysis", action="store_true")
     parser.add_argument("-p", "--proxy", help="Define HTTP proxy as address:port")
     parser.add_argument("-d", "--dumpdir", help="Define dump directory for retrieved files")
+    parser.add_argument("-l", "--logfile", help="Define file for logging progress")
     args = parser.parse_args()
 
     try:
         if args.thug:
             loadthug()
     except:
-        print "- Thug analysis not enabled (use -t to enable thug)"
+        logging.warning("Thug analysis not enabled (use -t to enable thug)")
 
     # proxy support
     if args.proxy:
         proxy = urllib2.ProxyHandler({'http': args.proxy})
         opener = urllib2.build_opener(proxy)
         urllib2.install_opener(opener)
-        print '- Using proxy', args.proxy
+        logging.info('Using proxy %s', args.proxy)
         my_ip = urllib2.urlopen('http://whatthehellismyip.com/?ipraw').read()
-        print '- External sites see',my_ip
+        logging.info('External sites see %s',my_ip)
 
     # dump directory
     if args.dumpdir:
@@ -215,10 +217,15 @@ if __name__ == "__main__":
             os.mkdir(dumpdir+'/.tmp')
             os.rmdir(dumpdir+'/.tmp')
         except:
-            print '- Could not open',dumpdir,'for reading, using default'
+            logging.error('Could not open %s for reading, using default', dumpdir)
             dumpdir = '/opt/malware/unsorted'
     else:
         dumpdir = '/opt/malware/unsorted'
+
+    if args.logfile:
+        logging.basicConfig(filename=args.logfile, level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+    else:
+        logging.basicConfig(level=logging.DEBUG, format='%(asctime) %message(s)', datefmt='%Y-%m-%d %H:%M:%S')
 
     #source list
     minotaur(parse('http://minotauranalysis.com/malwarelist-urls.aspx'))
