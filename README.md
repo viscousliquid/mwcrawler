@@ -38,6 +38,7 @@ Requirements:
 
 - BeautifulSoup 3.0.8 (later versions seem to have problems parsing html):
 	http://www.crummy.com/software/BeautifulSoup/
+- Python Magic (on Ubuntu, *aptitude install python-magic*
 
 
 Usage:
