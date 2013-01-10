@@ -31,3 +31,6 @@ pip-log.txt
 
 # malware DB
 unsorted
+
+# vim swap files
+*.swp
