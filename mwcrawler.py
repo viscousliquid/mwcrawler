@@ -103,7 +103,7 @@ def decisor(url):
             file = open(fpath, 'wb')
             file.write(url_dl)
             file.close
-            logging.info("Saved file type %s with md5: %s", filetype, md5)
+            logging.info("Saved file type %s with md5 %s from URL %s", filetype, md5, url)
 
 def malwaredl(soup):
     logging.info("Fetching from Malware Domain List")
