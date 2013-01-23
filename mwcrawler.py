@@ -242,10 +242,40 @@ if __name__ == "__main__":
     else:
         logging.basicConfig(level=logging.DEBUG, format='%(asctime) %message(s)', datefmt='%Y-%m-%d %H:%M:%S')
 
-    #source list
-    minotaur(parse('http://minotauranalysis.com/malwarelist-urls.aspx'))
-    malwaredl(parse('http://www.malwaredomainlist.com/hostslist/mdl.xml'))
-    vxvault(parse('http://vxvault.siri-urz.net/URL_List.php'))
-    malc0de(parse('http://malc0de.com/rss'))
-    malwarebl(parse('http://www.malwareblacklist.com/mbl.xml'))
-    sacour(parse('http://www.sacour.cn/showmal.asp?month=%d&year=%d' % (now.month, now.year)))
+   #source list
+    try:
+        minotaur(parse('http://minotauranalysis.com/malwarelist-urls.aspx'))
+    except:
+        logging.error('Couldn\'t load Minotaur')
+        pass
+
+    try:
+        malwaredl(parse('http://www.malwaredomainlist.com/hostslist/mdl.xml'))
+    except:
+        logging.error('Couldn\'t load Malware Domain List')
+        pass
+
+    try:
+        vxvault(parse('http://vxvault.siri-urz.net/URL_List.php'))
+    except:
+        logging.error('Couldn\'t load VxVault')
+        pass
+
+    try:
+        malc0de(parse('http://malc0de.com/rss'))
+    except:
+        logging.error('Couldn\'t load Malc0de')
+        pass
+
+    try:
+        malwarebl(parse('http://www.malwareblacklist.com/mbl.xml'))
+    except:
+        logging.error('Couldn\'t load Malware Black List')
+        pass
+
+    try:
+        sacour(parse('http://www.sacour.cn/showmal.asp?month=%d&year=%d' % (now.month, now.year)))
+    except:
+        logging.error('Couldn\'t load Sacour')
+        pass
+                                              
