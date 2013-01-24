@@ -76,7 +76,7 @@ def decisor(url):
     try:
         url_dl = urllib2.urlopen(url).read()
     except Exception, e:
-        #print "-- Error: %s" % e
+        logging.error('Could not fetch %s', url)
         return
 
     filetype = gettype(url_dl).split(' ')[0]
@@ -104,6 +104,8 @@ def decisor(url):
             file.write(url_dl)
             file.close
             logging.info("Saved file type %s with md5 %s from URL %s", filetype, md5, url)
+        else:
+            logging.info("Found duplicate of file with md5 %s on URL %s", md5, url)
 
 def malwaredl(soup):
     logging.info("Fetching from Malware Domain List")
@@ -186,7 +188,7 @@ def sacour(soup):
                 decisor(row)
 
 if __name__ == "__main__":
-    print "Malware Parser v0.4"
+    print "Malware Crawler v0.4"
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-t", "--thug", help="Enable thug analysis", action="store_true")
