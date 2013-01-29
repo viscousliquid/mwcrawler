@@ -30,6 +30,7 @@ import socket
 import datetime
 import argparse
 import logging
+import tempfile
 
 # By default thug analyis is disabled
 isthug    = False
@@ -213,17 +214,19 @@ if __name__ == "__main__":
         logging.info('External sites see %s',my_ip)
 
     # dump directory
+    # http://stackoverflow.com/questions/14574889/verify-directory-write-privileges
     if args.dumpdir:
-        dumpdir = args.dumpdir
         try:
-            os.mkdir(dumpdir+'/.tmp')
-            os.rmdir(dumpdir+'/.tmp')
-        except:
-            logging.error('Could not open %s for reading, using default', dumpdir)
-            dumpdir = '/opt/malware/unsorted'
+            d = tempfile.mkdtemp(dir=args.dumpdir)
+            dumpdir=args.dumpdir
+        except Exception as e:
+            logging.error('Could not open %s for writing (%s), using default', dumpdir, e)
+            dumpdir = '/tmp/malware/unsorted'
+        else:
+            os.rmdir(d)
     else:
-        dumpdir = '/opt/malware/unsorted'
-
+        dumpdir = '/tmp/malware/unsorted'
+ 
     if args.logfile:
         logging.basicConfig(filename=args.logfile, level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
     else:
